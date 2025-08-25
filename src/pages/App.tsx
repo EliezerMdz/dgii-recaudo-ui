@@ -12,50 +12,16 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Search, ChevronRight, ArrowLeft, CircleHelp } from 'lucide-react';
+
+import {
+  getDisplayName,
+  getDocLabel,
+  getStatus,
+  formatRD,
+  getDocLabelFromTaxPayer,
+} from '@/utils';
 import type { TaxPayer } from '@/types/tax-payer';
 import { useTaxPayer, useTaxReceipts } from '@/services/queries/tax-payer';
-
-const isNaturalPerson = (r: TaxPayer) => r?.taxPayerType.code === 'PER';
-
-const getDisplayName = (r: TaxPayer) => {
-  if (isNaturalPerson(r)) {
-    return [
-      r.naturalPerson?.firstName,
-      r.naturalPerson?.middleName,
-      r.naturalPerson?.firstLastName,
-      r.naturalPerson?.secondLastName,
-    ]
-      .filter(Boolean)
-      .join(' ')
-      .trim();
-  }
-  return r.legalEntity?.name ?? '—';
-};
-
-const getDocLabel = (r: TaxPayer) => {
-  const docDesc = r?.documentType.description ?? 'Documento';
-  const docNum =
-    r?.documentNumber ??
-    r?.naturalPerson?.documentNumber ??
-    r?.legalEntity?.rnc ??
-    '—';
-  return `${docDesc}: ${docNum}`;
-};
-
-const getStatus = (r: TaxPayer) => (r.isActive ? 'Activo' : 'Inactivo');
-
-const formatRD = (n: number) =>
-  n.toLocaleString('es-DO', { style: 'currency', currency: 'DOP' });
-
-const getDocLabelFromTaxPayer = (taxPayer: TaxPayer) => {
-  const desc = taxPayer?.documentType.description ?? 'Documento';
-  const num =
-    taxPayer?.documentNumber ??
-    taxPayer?.naturalPerson?.documentNumber ??
-    taxPayer?.legalEntity?.rnc ??
-    '—';
-  return `${desc}: ${num}`;
-};
 
 export default function RegistryPage() {
   const [query, setQuery] = useState('');
