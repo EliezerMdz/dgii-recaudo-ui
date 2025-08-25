@@ -65,7 +65,7 @@ export default function RegistryPage() {
           <Card>
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
-                {selectedId && (
+                {Boolean(selectedId) && (
                   <Button
                     variant="ghost"
                     size="sm"
@@ -77,10 +77,6 @@ export default function RegistryPage() {
                 )}
                 Contribuyentes
               </CardTitle>
-              <CardDescription>
-                Seleccione un contribuyente para visualizar sus comprobantes
-                fiscales
-              </CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="relative">
@@ -187,9 +183,11 @@ export default function RegistryPage() {
                 >
                   <CircleHelp className="h-12 w-12 mx-auto opacity-50 mb-4" />
                   <p className="text-sm">
-                    Select a registry{' '}
-                    <span className="hidden md:inline">from the left </span>
-                    to view related items
+                    Seleccione un contribuyente{' '}
+                    <span className="hidden md:inline">
+                      en el panel izquierdo{' '}
+                    </span>
+                    para visualizar sus comprobantes fiscales
                   </p>
                 </div>
               ) : isErrorTaxReceipts ? (
