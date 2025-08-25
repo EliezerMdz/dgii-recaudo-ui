@@ -7,11 +7,16 @@ import {
   CardHeader,
   CardTitle,
 } from '@/components/ui/card';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Search, ChevronRight, ArrowLeft, CircleHelp } from 'lucide-react';
+import {
+  ChevronRight,
+  ArrowLeft,
+  CircleHelp,
+  User,
+  Building2,
+} from 'lucide-react';
 
 import {
   getDisplayName,
@@ -20,13 +25,13 @@ import {
   formatRD,
   getDocLabelFromTaxPayer,
 } from '@/utils';
-import type { TaxPayer } from '@/types/tax-payer';
+import { TAX_PAYER_TYPES, type TaxPayer } from '@/types/tax-payer';
 import { useTaxPayer, useTaxReceipts } from '@/services/queries/tax-payer';
 import { QueryError } from '@/components/common/query-error';
 
 export default function RegistryPage() {
-  const [query, setQuery] = useState('');
-  const [selectedId, setSelectedId] = useState<number>(0);
+  const [selectedId, setSelectedId] = useState<number | null>(null);
+  const [taxPayerTypeId, setTaxPayerTypeId] = useState<1 | 2 | null>(null);
 
   const {
     data: taxPayers,
@@ -34,7 +39,7 @@ export default function RegistryPage() {
     isError: isErrorTaxPayer,
     error: taxPayersError,
     refetch: refetchTaxPayers,
-  } = useTaxPayer({});
+  } = useTaxPayer({ taxPayerType: taxPayerTypeId ?? undefined });
 
   const {
     data: taxReceipts,
@@ -44,7 +49,7 @@ export default function RegistryPage() {
     error: taxReceiptsError,
     refetch: refetchTaxReceipts,
   } = useTaxReceipts({
-    taxPayerId: selectedId,
+    taxPayerId: selectedId ?? 0,
   });
 
   const selectedRegistry = taxPayers?.data.find(
@@ -79,14 +84,33 @@ export default function RegistryPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <div className="relative">
-                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Buscar Contribuyentes..."
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  className="pl-10"
-                />
+              <div className="flex flex-wrap items-center gap-2">
+                {TAX_PAYER_TYPES.map((t) => {
+                  const selected = taxPayerTypeId === t.id;
+                  return (
+                    <Button
+                      key={t.id}
+                      type="button"
+                      size="sm"
+                      variant={selected ? 'default' : 'outline'}
+                      aria-pressed={selected}
+                      onClick={() => {
+                        setTaxPayerTypeId((prev) =>
+                          prev === t.id ? null : t.id
+                        );
+                        setSelectedId(null);
+                      }}
+                      className="flex items-center gap-2"
+                    >
+                      {t.code === 'PER' ? (
+                        <User className="h-4 w-4" />
+                      ) : (
+                        <Building2 className="h-4 w-4" />
+                      )}
+                      {t.description}
+                    </Button>
+                  );
+                })}
               </div>
               <div className="p-1 space-y-2 max-h-96 overflow-y-auto">
                 {isErrorTaxPayer ? (
