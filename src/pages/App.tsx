@@ -22,21 +22,31 @@ import {
 } from '@/utils';
 import type { TaxPayer } from '@/types/tax-payer';
 import { useTaxPayer, useTaxReceipts } from '@/services/queries/tax-payer';
+import { QueryError } from '@/components/common/query-error';
 
 export default function RegistryPage() {
   const [query, setQuery] = useState('');
   const [selectedId, setSelectedId] = useState<number>(0);
 
-  const { data: taxPayers, isLoading: isLoadingTaxPayers } = useTaxPayer({});
+  const {
+    data: taxPayers,
+    isLoading: isLoadingTaxPayers,
+    isError: isErrorTaxPayer,
+    error: taxPayersError,
+    refetch: refetchTaxPayers,
+  } = useTaxPayer({});
 
   const {
     data: taxReceipts,
     isLoading: isLoadingTaxReceipts,
     isFetching: isFetchingTaxRecipts,
+    isError: isErrorTaxReceipts,
+    error: taxReceiptsError,
+    refetch: refetchTaxReceipts,
   } = useTaxReceipts({
     taxPayerId: selectedId,
   });
-  console.log(selectedId);
+
   const selectedRegistry = taxPayers?.data.find(
     (taxPayer: TaxPayer) => taxPayer.id === selectedId
   );
@@ -83,7 +93,13 @@ export default function RegistryPage() {
                 />
               </div>
               <div className="p-1 space-y-2 max-h-96 overflow-y-auto">
-                {isLoadingTaxPayers ? (
+                {isErrorTaxPayer ? (
+                  <QueryError
+                    error={taxPayersError}
+                    onRetry={refetchTaxPayers}
+                    className="my-2"
+                  />
+                ) : isLoadingTaxPayers ? (
                   Array.from({ length: 3 }).map((_, i) => (
                     <Card key={i} className="p-4">
                       <div className="space-y-2">
@@ -172,10 +188,16 @@ export default function RegistryPage() {
                   <CircleHelp className="h-12 w-12 mx-auto opacity-50 mb-4" />
                   <p className="text-sm">
                     Select a registry{' '}
-                    <span className="hidden md:inline">from the left </span>to
-                    view related items
+                    <span className="hidden md:inline">from the left </span>
+                    to view related items
                   </p>
                 </div>
+              ) : isErrorTaxReceipts ? (
+                <QueryError
+                  error={taxReceiptsError}
+                  onRetry={refetchTaxReceipts}
+                  className="my-2"
+                />
               ) : isLoadingTaxReceipts || isFetchingTaxRecipts ? (
                 <div className="p-1 space-y-3">
                   {Array.from({ length: 3 }).map((_, i) => (
@@ -250,14 +272,14 @@ export default function RegistryPage() {
                 </div>
               )}
             </CardContent>
-            {selectedId &&
+            {Boolean(selectedId) &&
               !isLoadingTaxReceipts &&
               !isFetchingTaxRecipts &&
-              taxReceipts?.data && (
+              (taxReceipts?.data?.length ?? 0) > 0 && (
                 <CardFooter className="flex justify-end">
                   <span className="px-3 py-1 rounded-md bg-muted font-semibold text-primary">
                     {`Total ITBIS: ${formatRD(
-                      taxReceipts.data.reduce(
+                      taxReceipts!.data!.reduce(
                         (sum, it) => sum + (it.itbis ?? 0),
                         0
                       )
