@@ -25,13 +25,19 @@ import {
   formatRD,
   getDocLabelFromTaxPayer,
 } from '@/utils';
-import { TAX_PAYER_TYPES, type TaxPayer } from '@/types/tax-payer';
+import {
+  TAX_PAYER_TYPES,
+  type TaxPayer,
+  type TaxPayerTypeId,
+} from '@/types/tax-payer';
 import { useTaxPayer, useTaxReceipts } from '@/services/queries/tax-payer';
 import { QueryError } from '@/components/common/query-error';
 
 export default function RegistryPage() {
   const [selectedId, setSelectedId] = useState<number | null>(null);
-  const [taxPayerTypeId, setTaxPayerTypeId] = useState<1 | 2 | null>(null);
+  const [taxPayerTypeId, setTaxPayerTypeId] = useState<TaxPayerTypeId | null>(
+    null
+  );
 
   const {
     data: taxPayers,
@@ -297,6 +303,7 @@ export default function RegistryPage() {
             {Boolean(selectedId) &&
               !isLoadingTaxReceipts &&
               !isFetchingTaxRecipts &&
+              !isErrorTaxReceipts &&
               (taxReceipts?.data?.length ?? 0) > 0 && (
                 <CardFooter className="flex justify-end">
                   <span className="px-3 py-1 rounded-md bg-muted font-semibold text-primary">
