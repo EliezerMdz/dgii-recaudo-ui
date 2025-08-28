@@ -1,5 +1,5 @@
-import type { TaxPayer } from './tax-payer';
 import type { Pagination } from './api';
+import type { TaxPayer } from './tax-payer';
 
 export interface TaxReceipt {
   id: number;
