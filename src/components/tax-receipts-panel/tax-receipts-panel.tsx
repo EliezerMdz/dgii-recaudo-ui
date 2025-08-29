@@ -11,6 +11,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { CircleHelp } from 'lucide-react';
 
 import { QueryError } from '@/components/common/query-error';
+import { useTaxReceiptsSummary } from '@/services/queries/tax-receipts';
 import type { TaxPayer } from '@/types/tax-payer';
 import type { TaxReceipt, TaxReceiptsResponse } from '@/types/tax-receipt';
 import { formatRD, getDisplayName, getDocLabelFromTaxPayer } from '@/utils';
@@ -35,13 +36,25 @@ export default function TaxReceiptsPanel({
   taxReceiptsError,
   refetchTaxReceipts,
 }: Props) {
-  const fetching = isFetchingTaxReceipts;
   const hasData = (taxReceipts?.data?.length ?? 0) > 0;
 
   const selectedRegistry = taxReceipts?.data.find(
     (taxReceipt) => taxReceipt.id === selectedId
   );
 
+  const {
+    data: taxReceiptsSummary,
+    isLoading: isLoadingSummary,
+    isFetching: isFetchingSummary,
+    isError: isErrorSummary,
+  } = useTaxReceiptsSummary({ taxPayerId: selectedId ?? 0 });
+
+  const showFooter =
+    !!selectedId &&
+    !isErrorTaxReceipts &&
+    !(isLoadingTaxReceipts || isFetchingTaxReceipts) &&
+    hasData;
+  console.log(taxReceiptsSummary);
   return (
     <div className="space-y-4">
       <Card>
@@ -76,7 +89,7 @@ export default function TaxReceiptsPanel({
               onRetry={refetchTaxReceipts}
               className="my-2"
             />
-          ) : isLoadingTaxReceipts || fetching ? (
+          ) : isLoadingTaxReceipts || isFetchingTaxReceipts ? (
             <div className="p-1 space-y-3">
               {Array.from({ length: 3 }).map((_, i) => (
                 <Card key={i} className="p-4">
@@ -149,22 +162,37 @@ export default function TaxReceiptsPanel({
           )}
         </CardContent>
 
-        {Boolean(selectedId) &&
-          !isLoadingTaxReceipts &&
-          !fetching &&
-          !isErrorTaxReceipts &&
-          hasData && (
-            <CardFooter className="flex justify-end">
-              <span className="px-3 py-1 rounded-md bg-muted font-semibold text-primary">
-                {`Total ITBIS: ${formatRD(
-                  taxReceipts!.data!.reduce(
-                    (sum, it) => sum + (it.itbis ?? 0),
-                    0
-                  )
-                )}`}
+        {showFooter && (
+          <CardFooter className="flex justify-end gap-2 flex-wrap">
+            {(isLoadingSummary || isFetchingSummary) && (
+              <>
+                <Skeleton className="h-6 w-40 rounded-md" />
+                <Skeleton className="h-6 w-40 rounded-md" />
+                <Skeleton className="h-6 w-40 rounded-md" />
+              </>
+            )}
+
+            {isErrorSummary && (
+              <span className="text-xs text-muted-foreground">
+                No se pudo cargar el resumen.
               </span>
-            </CardFooter>
-          )}
+            )}
+
+            {!isLoadingSummary && !isFetchingSummary && !isErrorSummary && (
+              <>
+                <span className="px-3 py-1 rounded-md bg-muted font-semibold text-primary">
+                  Total Registros: {taxReceiptsSummary?.totalRecords}
+                </span>
+                <span className="px-3 py-1 rounded-md bg-muted font-semibold text-primary">
+                  Total Monto: {taxReceiptsSummary?.totalAmount}
+                </span>
+                <span className="px-3 py-1 rounded-md bg-muted font-semibold text-primary">
+                  Total ITBIS: {taxReceiptsSummary?.totalITBIS}
+                </span>
+              </>
+            )}
+          </CardFooter>
+        )}
       </Card>
     </div>
   );

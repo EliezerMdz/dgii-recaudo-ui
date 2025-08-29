@@ -14,3 +14,10 @@ export interface TaxReceiptsResponse {
   data: TaxReceipt[];
   pagination: Pagination;
 }
+
+export interface TaxReceiptsSummaryResponse {
+  taxPayerId: number;
+  totalRecords: number;
+  totalAmount: number;
+  totalITBIS: number;
+}

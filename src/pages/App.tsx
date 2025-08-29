@@ -2,7 +2,8 @@ import { useState } from 'react';
 
 import { TaxPayersPanel } from '@/components/tax-payers-panel';
 import { TaxReceiptsPanel } from '@/components/tax-receipts-panel';
-import { useTaxPayer, useTaxReceipts } from '@/services/queries/tax-payer';
+import { useTaxPayer } from '@/services/queries/tax-payer';
+import { useTaxReceipts } from '@/services/queries/tax-receipts';
 import { type TaxPayerTypeId } from '@/types/tax-payer';
 
 export default function RegistryPage() {
