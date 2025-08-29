@@ -1,5 +1,5 @@
-import type { TaxPayer } from './tax-payer';
 import type { Pagination } from './api';
+import type { TaxPayer } from './tax-payer';
 
 export interface TaxReceipt {
   id: number;
@@ -13,4 +13,11 @@ export interface TaxReceipt {
 export interface TaxReceiptsResponse {
   data: TaxReceipt[];
   pagination: Pagination;
+}
+
+export interface TaxReceiptsSummaryResponse {
+  taxPayerId: number;
+  totalRecords: number;
+  totalAmount: number;
+  totalITBIS: number;
 }
